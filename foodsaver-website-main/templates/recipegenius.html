@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Genius 🍳 | Powered by Gemini AI</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #dbeafe);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #1e3a8a;
+      margin-top: 40px;
+      font-size: 2rem;
+    }
+
+    .container {
+      background: white;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      border: 2px solid #3b82f6;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #3b82f6;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+
+    .loader {
+      display: none;
+      margin: 20px auto;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #output {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: left;
+      white-space: pre-wrap;
+      color: #111827;
+      line-height: 1.5;
+      display: none;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 15px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    footer span {
+      color: #2563eb;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ Recipe Genius</h1>
+  <div class="container">
+    <p>Enter your ingredients and let Gemini AI create recipes for you!</p>
+    <input type="text" id="ingredients" placeholder="e.g., rice, chicken, tomato" />
+    <br />
+    <button onclick="generateRecipe()">Generate Recipes</button>
+
+    <div class="loader" id="loader"></div>
+    <div id="output"></div>
+  </div>
+
+  <footer>
+    Powered by <span>Google Gemini 2.5 Flash 🌟</span>
+  </footer>
+
+  <script>
+    async function generateRecipe() {
+      const ingredients = document.getElementById("ingredients").value.trim();
+      const outputDiv = document.getElementById("output");
+      const loader = document.getElementById("loader");
+
+      if (!ingredients) {
+        alert("Please enter some ingredients!");
+        return;
+      }
+
+      // Clear old output
+      outputDiv.style.display = "none";
+      loader.style.display = "block";
+      outputDiv.innerText = "";
+
+      try {
+        const response = await fetch("/generate_recipe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ingredients })
+        });
+
+        const data = await response.json();
+        loader.style.display = "none";
+
+        if (data.recipes) {
+          outputDiv.innerText = data.recipes;
+          outputDiv.style.display = "block";
+        } else {
+          outputDiv.innerText = "❌ Error: " + (data.error || "Unable to generate recipe.");
+          outputDiv.style.display = "block";
+        }
+      } catch (error) {
+        loader.style.display = "none";
+        outputDiv.style.display = "block";
+        outputDiv.innerText = "⚠️ Server error. Please make sure Flask is running.";
+      }
+    }
+  </script>
+</body>
+</html>
